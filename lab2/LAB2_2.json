@@ -1,0 +1,109 @@
+{
+  "name": "LAB2-2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "users",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8a588871-8afe-4212-bd92-36c9a7da265b",
+      "name": "Webhook",
+      "webhookId": "d3cf7735-f83a-4730-9515-e9d088f1ae80"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "895dea8a-c418-4d14-9a1e-b27115946502",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "ebcec7de-c9d2-4845-b70d-68e791a90212",
+              "name": "age",
+              "value": "={{ $json.body.age }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "efc55660-2d65-45cc-a2db-24568fef549b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "projectId": "n8n-project-68-e95ae",
+        "collection": "users",
+        "columns": "name"
+      },
+      "type": "n8n-nodes-base.googleFirebaseCloudFirestore",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "ed036f49-3aba-4a4b-84ed-f2a9ef27c6dd",
+      "name": "Create a document",
+      "credentials": {
+        "googleFirebaseCloudFirestoreOAuth2Api": {
+          "id": "RuZbaQz70DEy6llE",
+          "name": "Google Firebase Cloud Firestore account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "25af88bb-e54e-4e75-8c35-777542b3f6d5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d66901ff25b06fd828953fed8c0ec0ab625ac95c268ccf28046f39ba701a2fc6"
+  },
+  "id": "ILQaqkzg2RVdmqYe",
+  "tags": []
+}

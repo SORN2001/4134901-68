@@ -1,0 +1,93 @@
+{
+  "name": "LAB2-4",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "users",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        20
+      ],
+      "id": "ee72bb0d-ae22-4047-88ae-0ada2939d25d",
+      "name": "Webhook",
+      "webhookId": "6b6eef5d-026c-493e-ab4d-51bb48fa3432"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "projectId": "n8n-project-68-e95ae",
+        "collection": "users",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.googleFirebaseCloudFirestore",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        20
+      ],
+      "id": "57a74e8b-5a4a-4d46-a6f8-8beecb63b43a",
+      "name": "Get many documents",
+      "credentials": {
+        "googleFirebaseCloudFirestoreOAuth2Api": {
+          "id": "RuZbaQz70DEy6llE",
+          "name": "Google Firebase Cloud Firestore account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        320,
+        20
+      ],
+      "id": "4c346352-d001-472a-886b-94e749b08877",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many documents": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e1c524cb-3416-437a-9d3a-338449a47fc0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d66901ff25b06fd828953fed8c0ec0ab625ac95c268ccf28046f39ba701a2fc6"
+  },
+  "id": "EWf37BtzPRBrmbSO",
+  "tags": []
+}

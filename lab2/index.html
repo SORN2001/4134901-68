@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข้อมูลจาก Firebase (ผ่าน n8n API)</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        h1 { color: #333; text-align: center; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        #loading {
+            text-align: center;
+            font-size: 1.2em;
+            color: #666;
+            margin-top: 50px;
+        }
+        #error {
+            text-align: center;
+            font-size: 1.2em;
+            color: #d9534f;
+            margin-top: 50px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ข้อมูลที่ส่งมาจากฟอร์ม (Firebase)</h1>
+
+    <div id="loading">กำลังโหลดข้อมูล...</div>
+    <div id="error">เกิดข้อผิดพลาดในการดึงข้อมูล</div>
+    <table id="dataTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>ชื่อ-นามสกุล</th>
+                <th>ID</th>
+                <th>_createTime</th>
+                <th>_updateTime</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+    <script>
+        const API_URL = 'http://localhost:5678/webhook-test/users';
+
+        async function fetchData() {
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const dataTable = document.getElementById('dataTable');
+            const tableBody = dataTable.querySelector('tbody');
+
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            dataTable.style.display = 'none';
+            tableBody.innerHTML = ''; // Clear previous data
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log("Data received:", data); //  Debugging
+
+                if (data && data.length > 0) {
+                    data.forEach(item => {
+                        const row = tableBody.insertRow();
+                        row.insertCell().textContent = item.name || '-';
+                        row.insertCell().textContent = item._id || '-';
+                        row.insertCell().textContent = item._updateTime || '-';
+                        row.insertCell().textContent = new Date(item._createTime).toLocaleString() || '-';
+                    });
+                    dataTable.style.display = 'table';
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="4">ไม่พบข้อมูล</td></tr>';
+                    dataTable.style.display = 'table';
+                }
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+                errorDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', fetchData);
+
+        // setInterval(fetchData, 30000); 
+    </script>
+
+</body>
+</html>
