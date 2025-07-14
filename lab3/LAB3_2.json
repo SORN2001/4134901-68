@@ -1,0 +1,433 @@
+{
+  "name": "LAB3-2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7e6b70f5-3863-4218-b9b5-0f135eb7db39",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 948891035,
+          "mode": "list",
+          "cachedResultName": "sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs/edit#gid=948891035"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        220,
+        0
+      ],
+      "id": "19f6f617-85f7-43c0-8bc2-da42423509f9",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wSCyrkw5VWZpjxmh",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"User-Agent\":\n  \"Mozilla/5.0\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "e3b8b8f6-196a-40d5-9824-7fd2cb283bea",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = $input.first().json.data;\n\nconst match = html.match(/var ytInitialData = (.*?);\\s*<\\/script>/s);\nif (!match) {\n  return [{ json: { error: \"ytInitialData not found\" } }];\n}\n\nlet data;\ntry {\n  data = JSON.parse(match[1]);\n} catch (err) {\n  return [{ json: { error: \"Invalid JSON\", details: err.message } }];\n}\n\nlet title = null;\nlet description = null;\n\n\ntry {\n  const contents = data.contents.twoColumnWatchNextResults.results.results.contents;\n  const videoPrimaryInfo = contents.find(c => c.videoPrimaryInfoRenderer);\n  title = videoPrimaryInfo.videoPrimaryInfoRenderer.title.runs[0].text;\n} catch (e) {\n  title = null;\n}\n\n\nfunction findAttributedDescription(obj) {\n  if (typeof obj !== 'object' || obj === null) return null;\n\n  if (obj.attributedDescription && obj.attributedDescription.content) {\n    return obj.attributedDescription.content;\n  }\n\n  for (const key in obj) {\n    const result = findAttributedDescription(obj[key]);\n    if (result) return result;\n  }\n\n  return null;\n}\n\ndescription = findAttributedDescription(data);\n\nreturn [{\n  json: {\n    title,\n    description\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "046065fd-2fe1-433c-b430-162e51626b2a",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ],
+      "id": "3bc6ec4b-3bc3-4fb1-9b90-66e6e40d8fd1",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "UT4jAb4vaKpp1aKo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=คุณเป็นผู้เชี่ยวชาญด้าน YouTube SEO ช่วยเปลี่ยนชื่อคลิปวิดีโอจาก {{ $json.title }} ให้มีความน่าสนใจมากขึ้น ดึงดูดผู้ชมและเพิ่มโอกาสในการคลิก โดยแสดงผลลัพธ์ในรูปแบบ JSON เท่านั้น:\n\n{\n  \"title_old\": \"{{ $json.title }},\n  \"title_new\": \"...\"\n}\n\n*** อย่าใส่เครื่องหม่าย ``` หรือคำอธิบายอื่น ***",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        940,
+        -100
+      ],
+      "id": "a43da139-44fa-4882-bcc1-1e5faf0b4a02",
+      "name": "New Title Generating"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=คุณเป็นผู้เชี่ยวชาญด้าน YouTube SEO ช่วยสร้างคำอธิบายคลิป {{ $json.description }} ให้มีความน่าสนใจมากขึ้น ดึงดูดผู้ชมและเพิ่มโอกาสในการคลิก โดยแสดงผลลัพธ์ในรูปแบบ JSON เท่านั้น:\n\n{\n  \"des_old\": \"{{ $json.description }}\",\n  \"des_new\": \"...\"\n}\n\n*** อย่าใส่เครื่องหม่าย ``` หรือคำอธิบายอื่น ***",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        940,
+        100
+      ],
+      "id": "57da744b-3849-4b5c-adb2-5a4d14e6213d",
+      "name": "New Description Generating"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json[\"text\"]; // ดึง string ที่เก็บ JSON มา\nconst parsed = JSON.parse(raw); // แปลง string -> object JSON แท้\nreturn [{ json: parsed }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        -100
+      ],
+      "id": "ad54025d-9107-4ebe-b0c7-542daaf7dae5",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json[\"text\"]; // ดึง string ที่เก็บ JSON มา\nconst parsed = JSON.parse(raw); // แปลง string -> object JSON แท้\nreturn [{ json: parsed }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        100
+      ],
+      "id": "7339bc46-eacd-4d5c-af75-780852ab4a5a",
+      "name": "Code2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1560,
+        0
+      ],
+      "id": "c7fe383b-236b-4b1b-8b32-f3be92f8b5ee",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        0
+      ],
+      "id": "2b4442f1-4dcf-4a86-a140-04fe5d2c581f",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 948891035,
+          "mode": "list",
+          "cachedResultName": "sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs/edit#gid=948891035"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $('Get row(s) in sheet').item.json.url }}",
+            "title_old": "={{ $json.data[0].title_old }}",
+            "des_old": "={{ $json.data[1].des_old }}",
+            "des_new": "={{ $json.data[1].des_new }}",
+            "title_new": "={{ $json.data[0].title_new }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title_old",
+              "displayName": "title_old",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "des_old",
+              "displayName": "des_old",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title_new",
+              "displayName": "title_new",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "des_new",
+              "displayName": "des_new",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1940,
+        0
+      ],
+      "id": "5c974889-335c-435a-ac26-6bc99e3c7971",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wSCyrkw5VWZpjxmh",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "New Title Generating",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "New Description Generating",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "New Title Generating",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "New Description Generating",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Title Generating": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Description Generating": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "79ac609c-1d48-4bb9-abf4-b18b00909b43",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d66901ff25b06fd828953fed8c0ec0ab625ac95c268ccf28046f39ba701a2fc6"
+  },
+  "id": "3wNCLPjZdceLuygv",
+  "tags": []
+}

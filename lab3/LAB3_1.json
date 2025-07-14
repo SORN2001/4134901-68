@@ -1,0 +1,304 @@
+{
+  "name": "LAB3-1",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "call",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "eacf39f2-d1c3-4962-8a05-69b143bd4b28",
+      "name": "Webhook",
+      "webhookId": "07871672-af0f-4fde-9650-56e7a4fa2b76"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "eec1a3d0-bc47-49cc-b7ba-3ab22397c6f7",
+              "leftValue": "={{ $json.query.data }}",
+              "rightValue": "good",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "857aff61-38eb-4603-8e20-f94d7b37aef2",
+              "leftValue": "={{ $json.body.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "46599490-62b7-43a2-86f2-204a3a8faa1e",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        100
+      ],
+      "id": "9bf961ad-bd64-4392-a08a-99f9560b5040",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7bd445f1-857f-4ddb-9b46-49b0b9d12836",
+              "name": "query.data",
+              "value": "={{ $json.query.data }}",
+              "type": "string"
+            },
+            {
+              "id": "3c26f45d-6f2a-4728-8c63-d69f679cabba",
+              "name": "query.age",
+              "value": "={{ Number ($json.query.age) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        -100
+      ],
+      "id": "47052d1f-ea74-476a-b118-c864d89fa9c1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dec083f4-77a3-41e6-954c-b800c2f5c53a",
+              "leftValue": "={{ $json.query.age }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        -100
+      ],
+      "id": "5cfab9a8-1060-4948-841b-69b36b349e70",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "301d9cb2-5ee3-42fe-8869-488d02dfe87e",
+              "name": "data",
+              "value": "={{ $json.query.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        900,
+        -220
+      ],
+      "id": "b65f4fe3-89ec-420c-991b-a4ff70b537b6",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jkOJ35WJ4nRfTfT5Av-WbiwD1i1HR50X2-FUP1leoHs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data": "={{ $json.data }}"
+          },
+          "matchingColumns": [
+            "data"
+          ],
+          "schema": [
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1120,
+        -100
+      ],
+      "id": "eaa26fcf-6e70-4f4c-afa9-ffeb898f3499",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wSCyrkw5VWZpjxmh",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "42654401-060d-4d7e-a81a-4c65f74cfe69",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d66901ff25b06fd828953fed8c0ec0ab625ac95c268ccf28046f39ba701a2fc6"
+  },
+  "id": "6KIbyq2T6UoHnKo9",
+  "tags": []
+}
